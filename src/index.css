@@ -21,7 +21,7 @@
 
 @layer base {
   body {
-    @apply bg-bg-primary text-text-primary font-sans antialiased h-screen overflow-hidden;
+    @apply bg-bg-primary text-text-primary font-sans antialiased min-h-[100dvh] h-full overflow-hidden;
   }
 }
 

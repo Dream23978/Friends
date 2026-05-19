@@ -587,7 +587,16 @@ export default function App() {
       setIsLanding(false);
     } catch (error: any) {
       console.error("Login failed:", error);
-      alert(`Login gagal: ${error.message || "Pastikan domain ini sudah terdaftar di Authorized Domains Firebase Console."}`);
+      // Detailed error for common Firebase issues
+      let friendlyMsg = error.message || "Pastikan domain ini sudah terdaftar di Authorized Domains Firebase Console.";
+      if (error.code === 'auth/popup-blocked') {
+        friendlyMsg = "Popup terblokir oleh browser. Coba aktifkan popup atau gunakan browser lain.";
+      } else if (error.code === 'auth/unauthorized-domain') {
+        friendlyMsg = "Domain ini belum diizinkan untuk login. Hubungi admin atau tambahkan domain ini ke Firebase Console.";
+      } else if (error.code === 'auth/operation-not-allowed') {
+        friendlyMsg = "Metode login Google belum diaktifkan di Firebase Console.";
+      }
+      alert(`Login gagal (${error.code || 'unknown'}): ${friendlyMsg}\n\nTips: Jika ini di website baru, pastikan domain ini (${window.location.hostname}) sudah terdaftar di Authorized Domains di Firebase Console.`);
     }
   };
 
@@ -923,19 +932,19 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, scale: 1.05 }}
-            className="fixed inset-0 z-50 flex flex-col items-center justify-center p-8 bg-transparent"
+            className="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 bg-transparent overflow-y-auto"
           >
-            <div className="absolute top-8 right-8 z-[60]">
+            <div className="absolute top-4 md:top-8 right-4 md:right-8 z-[60]">
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
-                className="p-4 rounded-2xl bg-white/50 dark:bg-slate-900/40 border border-border-subtle dark:border-white/10 text-[#4A5759] dark:text-[#E2E8F0] hover:bg-white dark:hover:bg-slate-900/60 transition-all shadow-sm"
+                className="p-3 md:p-4 rounded-2xl bg-white/50 dark:bg-slate-900/40 border border-border-subtle dark:border-white/10 text-[#4A5759] dark:text-[#E2E8F0] hover:bg-white dark:hover:bg-slate-900/60 transition-all shadow-sm"
                 title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
               >
-                {isDarkMode ? <Sun size={24} /> : <Moon size={24} />}
+                {isDarkMode ? <Sun size={20} md:size={24} /> : <Moon size={20} md:size={24} />}
               </button>
             </div>
 
-            <div className="text-center space-y-12 max-w-lg w-full relative z-10">
+            <div className="text-center space-y-6 md:space-y-12 max-w-sm md:max-w-lg w-full relative z-10 py-10">
               <motion.div
                 animate={{ 
                   y: [0, -10, 0],
@@ -948,35 +957,35 @@ export default function App() {
                 }}
                 className="relative inline-block"
               >
-                <div className={`absolute inset-0 ${isDarkMode ? "bg-indigo-300" : "bg-yellow-200"} blur-3xl opacity-40 rounded-full transition-all duration-1000`} />
-                <div className="relative w-32 h-32 bg-white dark:bg-[#1E293B] rounded-full flex items-center justify-center border-8 border-white dark:border-[#1E293B] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_0_50px_rgba(255,255,255,0.2)] overflow-hidden transition-all duration-1000">
-                  <Smile size={80} className={`${isDarkMode ? "text-white dark:drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]" : "text-yellow-400 fill-yellow-50"}`} strokeWidth={1.5} />
-                  <div className="absolute top-1/2 left-1/4 w-3 h-2 bg-pink-200 dark:bg-pink-900/40 rounded-full blur-[2px]" />
-                  <div className="absolute top-1/2 right-1/4 w-3 h-2 bg-pink-200 dark:bg-pink-900/40 rounded-full blur-[2px]" />
+                <div className={`absolute inset-0 ${isDarkMode ? "bg-indigo-300" : "bg-yellow-200"} blur-3xl opacity-30 rounded-full transition-all duration-1000`} />
+                <div className="relative w-24 h-24 md:w-32 md:h-32 bg-white dark:bg-[#1E293B] rounded-full flex items-center justify-center border-6 md:border-8 border-white dark:border-[#1E293B] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_0_50px_rgba(255,255,255,0.2)] overflow-hidden transition-all duration-1000">
+                  <Smile size={60} md:size={80} className={`${isDarkMode ? "text-white dark:drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]" : "text-yellow-400 fill-yellow-50"}`} strokeWidth={1.5} />
                 </div>
               </motion.div>
               
-              <div className="space-y-4">
-                <h1 className="text-6xl md:text-7xl font-serif italic text-[#4A5759] dark:text-white dark:drop-shadow-[0_0_25px_rgba(255,255,255,0.8)] dark:[text-shadow:0_0_30px_rgba(255,255,255,0.4)] transition-all duration-1000">Friend</h1>
-                <p className="text-lg text-muted dark:text-[#94A3B8] font-light leading-relaxed">
+              <div className="space-y-3 md:space-y-4 px-4">
+                <h1 className="text-5xl md:text-7xl font-serif italic text-[#4A5759] dark:text-white dark:drop-shadow-[0_0_25px_rgba(255,255,255,0.8)] transition-all duration-1000">Friend</h1>
+                <p className="text-sm md:text-lg text-muted dark:text-[#94A3B8] font-light leading-relaxed max-w-[280px] md:max-w-none mx-auto">
                   Tarik napas sejenak. <br />
                   Gue di sini buat dengerin apa pun yang ada di pikiran lo.
                 </p>
               </div>
 
-              <button
-                onClick={handleLogin}
-                className="group relative w-full sm:w-[320px] px-8 py-5 bg-friend-bg text-white rounded-full font-bold tracking-[0.2em] uppercase shadow-xl hover:shadow-2xl transition-all hover:scale-[1.02] active:scale-95 overflow-hidden flex items-center justify-center gap-4 mx-auto"
-              >
-                <div className="relative z-10 p-1.5 bg-white rounded-full flex items-center justify-center shrink-0">
-                  <img src="https://www.gstatic.com/images/branding/product/2x/googleg_48dp.png" className="w-5 h-5" alt="Google" />
-                </div>
-                <span className="relative z-10 whitespace-nowrap">Masuk via Google</span>
-                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              </button>
+              <div className="px-6 md:px-4">
+                <button
+                  onClick={handleLogin}
+                  className="group relative w-full max-w-[280px] md:max-w-none px-6 py-4 md:py-5 bg-friend-bg text-white rounded-full font-bold tracking-[0.1em] md:tracking-[0.2em] uppercase shadow-lg hover:shadow-2xl transition-all hover:scale-[1.02] active:scale-95 overflow-hidden flex items-center justify-center gap-3 md:gap-4 mx-auto"
+                >
+                  <div className="relative z-10 p-1 bg-white rounded-full flex items-center justify-center shrink-0">
+                    <img src="https://www.gstatic.com/images/branding/product/2x/googleg_48dp.png" className="w-5 h-5 md:w-6 md:h-6" alt="Google" />
+                  </div>
+                  <span className="relative z-10 whitespace-nowrap text-sm md:text-base">Masuk via Google</span>
+                  <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </button>
+              </div>
 
-              <div className="flex gap-4 justify-center pt-8 opacity-40">
-                <Smile size={20} className="text-[#4A5759] dark:text-[#E2E8F0]" />
+              <div className="flex gap-4 justify-center pt-4 md:pt-8 opacity-40">
+                <Smile size={18} md:size={20} className="text-[#4A5759] dark:text-[#E2E8F0]" />
                 <div className="w-1.5 h-1.5 rounded-full bg-border-subtle dark:bg-white/20 my-auto" />
                 <p className="text-[10px] font-bold uppercase tracking-widest text-[#4A5759] dark:text-[#E2E8F0]">Secure & Private</p>
               </div>
@@ -1025,21 +1034,21 @@ export default function App() {
             </aside>
 
             {/* Main Chat Area */}
-            <main className="flex-1 flex flex-col relative max-w-4xl mx-auto w-full px-4 md:px-12 pb-4 md:pb-6 h-full overflow-hidden">
+            <main className="flex-1 flex flex-col relative max-w-4xl mx-auto w-full px-4 md:px-12 pb-2 md:pb-6 h-full overflow-hidden">
               {isEditingProfile ? (
                 <EditProfileView />
               ) : (
                 <>
                   {/* Sticky Top Navbar */}
-                  <header className="sticky top-0 z-20 -mx-4 md:-mx-12 px-4 md:px-12 py-4 bg-white/60 dark:bg-[#0F172A]/70 backdrop-blur-xl border-b border-border-subtle dark:border-white/10 flex items-center justify-between transition-all duration-500 shadow-sm mb-6">
-                    <div className="flex items-center gap-4">
+                  <header className="sticky top-0 z-20 -mx-4 md:-mx-12 px-4 md:px-12 py-3 md:py-4 bg-white/60 dark:bg-[#0F172A]/70 backdrop-blur-xl border-b border-border-subtle dark:border-white/10 flex items-center justify-between transition-all duration-500 shadow-sm mb-4 md:mb-6">
+                    <div className="flex items-center gap-2 md:gap-4">
                       <button 
                         onClick={() => setIsMobileMenuOpen(true)}
                         className="md:hidden p-2 -ml-2 text-[#4A5759] dark:text-[#E2E8F0] hover:bg-subtle-bg dark:hover:bg-white/5 rounded-full transition-colors"
                       >
-                        <Smile size={24} />
+                        <Smile size={20} md:size={24} />
                       </button>
-                      <h1 className="px-4 py-1.5 rounded-2xl text-xl md:text-2xl font-serif italic text-[#4A5759] dark:text-white dark:drop-shadow-[0_0_10px_rgba(255,255,255,0.4)]">Friend</h1>
+                      <h1 className="px-2 md:px-4 py-1 rounded-2xl text-lg md:text-2xl font-serif italic text-[#4A5759] dark:text-white dark:drop-shadow-[0_0_10px_rgba(255,255,255,0.4)]">Friend</h1>
                     </div>
                     
                     <div className="flex items-center gap-3">
