@@ -585,8 +585,9 @@ export default function App() {
     try {
       await signInWithGoogle();
       setIsLanding(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login failed:", error);
+      alert(`Login gagal: ${error.message || "Pastikan domain ini sudah terdaftar di Authorized Domains Firebase Console."}`);
     }
   };
 
@@ -912,7 +913,7 @@ export default function App() {
   };
 
   return (
-    <div className={`flex h-screen w-full overflow-hidden transition-colors duration-500 ${isDarkMode ? "dark" : ""}`}>
+    <div className={`flex h-screen h-[100dvh] w-full overflow-hidden transition-colors duration-500 ${isDarkMode ? "dark" : ""}`}>
       <BackgroundEffect isDarkMode={isDarkMode} />
       
       <AnimatePresence mode="wait">
@@ -1024,7 +1025,7 @@ export default function App() {
             </aside>
 
             {/* Main Chat Area */}
-            <main className="flex-1 flex flex-col relative max-w-4xl mx-auto w-full px-4 md:px-12 pb-4 md:pb-12 h-screen overflow-hidden">
+            <main className="flex-1 flex flex-col relative max-w-4xl mx-auto w-full px-4 md:px-12 pb-4 md:pb-6 h-full overflow-hidden">
               {isEditingProfile ? (
                 <EditProfileView />
               ) : (
@@ -1155,33 +1156,33 @@ export default function App() {
                   </div>
 
                   {/* Input & Call to Actions */}
-                  <div className="absolute bottom-8 left-4 right-4 md:left-12 md:right-12 flex flex-col items-center gap-6 bg-transparent">
-                    <div className="flex flex-wrap gap-3 justify-center min-h-[44px]">
+                  <div className="sticky bottom-0 left-0 right-0 py-6 px-4 md:px-0 flex flex-col items-center gap-4 bg-transparent mt-auto z-30">
+                    <div className="flex flex-wrap gap-2 justify-center min-h-[40px]">
                       {isBurningMode && (
                         <button 
                           onClick={burnMessages}
-                          className="flex items-center gap-2 px-6 py-3 rounded-full bg-coral-warm text-white hover:bg-red-600 transition-colors font-medium text-sm shadow-md animate-fade-in"
+                          className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-coral-warm text-white hover:bg-red-600 transition-colors font-medium text-xs shadow-md animate-fade-in"
                         >
-                          <Flame size={18} /> Bakar Perasaan Ini!
+                          <Flame size={16} /> Bakar Perasaan Ini!
                         </button>
                       )}
                     </div>
 
-                    <div className="w-full max-w-2xl bg-white dark:bg-[#1E293B] rounded-full px-6 py-3 md:px-8 md:py-4 flex items-center shadow-lg border border-border-subtle dark:border-white/10 focus-within:ring-2 focus-within:ring-friend-bg transition-all dark:shadow-[0_0_30px_rgba(255,255,255,0.05)] dark:focus-within:shadow-[0_0_40px_rgba(255,255,255,0.1)]">
+                    <div className="w-full max-w-2xl bg-white dark:bg-[#1E293B] rounded-[2rem] md:rounded-full px-5 py-3 md:px-8 md:py-4 flex items-center shadow-2xl border border-border-subtle dark:border-white/10 focus-within:ring-2 focus-within:ring-friend-bg transition-all dark:shadow-[0_0_40px_rgba(255,255,255,0.05)]">
                       <input 
                         type="text" 
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && handleSend()}
                         placeholder={isBurningMode ? "Tumpahin semua kekesalan lo di sini..." : "Tulis apa aja, gw dengerin..."}
-                        className="flex-1 bg-transparent border-none outline-none text-[#4A5759] dark:text-[#E2E8F0] placeholder-[#B8B8B2] dark:placeholder-[#64748B] text-sm md:text-base transition-colors"
+                        className="flex-1 bg-transparent border-none outline-none text-[#4A5759] dark:text-[#E2E8F0] placeholder-[#B8B8B2] dark:placeholder-[#64748B] text-sm md:text-base"
                       />
                       <button 
                         onClick={() => handleSend()}
                         disabled={isLoading || !inputValue.trim()}
-                        className={`ml-4 text-friend-bg dark:text-indigo-400 font-bold text-sm tracking-widest uppercase flex items-center gap-2 hover:scale-105 transition-transform ${isLoading ? "opacity-30" : ""}`}
+                        className={`ml-2 md:ml-4 p-2 md:p-0 text-friend-bg dark:text-indigo-400 font-bold text-xs md:text-sm tracking-widest uppercase flex items-center gap-2 hover:scale-105 transition-transform ${isLoading ? "opacity-30" : ""}`}
                       >
-                        Kirim <Send size={16} />
+                        <span className="hidden md:inline">Kirim</span> <Send size={18} />
                       </button>
                     </div>
                   </div>
