@@ -27,8 +27,15 @@ async function startServer() {
     try {
       const { history, message, systemInstruction } = req.body;
       
+      console.log(`[Chat] Request from user. History length: ${history?.length || 0}`);
+
+      if (!process.env.GEMINI_API_KEY) {
+        console.error("[Chat] GEMINI_API_KEY is missing!");
+        return res.status(500).json({ error: "Gemini API Key is not configured on the server." });
+      }
+      
       const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-flash-latest",
         contents: [
           ...history,
           { role: "user", parts: [{ text: message }] }
@@ -41,19 +48,32 @@ async function startServer() {
         },
       });
 
-      res.json({ text: response.text || "Duh, sori banget, gw lagi agak nge-blank nih. Bisa diulang?" });
-    } catch (error) {
-      console.error("Chat Error:", error);
-      res.status(500).json({ error: "Failed to chat with Gemini" });
+      const responseText = response.text;
+      
+      if (!responseText) {
+        console.warn("[Chat] Gemini returned empty response. Response object:", JSON.stringify(response));
+        return res.json({ text: "Duh, sori banget, gw lagi agak nge-blank nih. Bisa diulang?" });
+      }
+
+      console.log(`[Chat] Success. Response length: ${responseText.length}`);
+      res.json({ text: responseText });
+    } catch (error: any) {
+      console.error("[Chat] API Error:", error);
+      res.status(500).json({ error: "Failed to chat with Gemini", details: error.message });
     }
   });
 
   app.post("/api/sticker", async (req, res) => {
     try {
       const { prompt } = req.body;
+      console.log(`[Sticker] Generating for prompt: ${prompt.substring(0, 30)}...`);
+
+      if (!process.env.GEMINI_API_KEY) {
+        return res.status(500).json({ error: "Gemini API Key missing" });
+      }
       
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash-image",
+        model: "gemini-2.0-flash-exp", // Use a more reliable experimental model if 2.5 is not available
         contents: {
           parts: [{ text: prompt }]
         },
@@ -73,13 +93,15 @@ async function startServer() {
       }
 
       if (imageData) {
+        console.log("[Sticker] Success");
         res.json({ imageUrl: imageData });
       } else {
+        console.warn("[Sticker] No image data in response:", JSON.stringify(response));
         res.status(500).json({ error: "Failed to generate sticker image" });
       }
-    } catch (error) {
-      console.error("Sticker Error:", error);
-      res.status(500).json({ error: "Failed to generate sticker" });
+    } catch (error: any) {
+      console.error("[Sticker] API Error:", error);
+      res.status(500).json({ error: "Failed to generate sticker", details: error.message });
     }
   });
 

@@ -940,7 +940,7 @@ export default function App() {
                 className="p-3 md:p-4 rounded-2xl bg-white/50 dark:bg-slate-900/40 border border-border-subtle dark:border-white/10 text-[#4A5759] dark:text-[#E2E8F0] hover:bg-white dark:hover:bg-slate-900/60 transition-all shadow-sm"
                 title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
               >
-                {isDarkMode ? <Sun size={20} md:size={24} /> : <Moon size={20} md:size={24} />}
+                {isDarkMode ? <Sun className="w-5 h-5 md:w-6 md:h-6" /> : <Moon className="w-5 h-5 md:w-6 md:h-6" />}
               </button>
             </div>
 
@@ -959,7 +959,7 @@ export default function App() {
               >
                 <div className={`absolute inset-0 ${isDarkMode ? "bg-indigo-300" : "bg-yellow-200"} blur-3xl opacity-30 rounded-full transition-all duration-1000`} />
                 <div className="relative w-24 h-24 md:w-32 md:h-32 bg-white dark:bg-[#1E293B] rounded-full flex items-center justify-center border-6 md:border-8 border-white dark:border-[#1E293B] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_0_50px_rgba(255,255,255,0.2)] overflow-hidden transition-all duration-1000">
-                  <Smile size={60} md:size={80} className={`${isDarkMode ? "text-white dark:drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]" : "text-yellow-400 fill-yellow-50"}`} strokeWidth={1.5} />
+                  <Smile className="w-16 h-16 md:w-20 md:h-20 text-yellow-400 fill-yellow-50 dark:text-white dark:drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]" strokeWidth={1.5} />
                 </div>
               </motion.div>
               
@@ -985,7 +985,7 @@ export default function App() {
               </div>
 
               <div className="flex gap-4 justify-center pt-4 md:pt-8 opacity-40">
-                <Smile size={18} md:size={20} className="text-[#4A5759] dark:text-[#E2E8F0]" />
+                <Smile className="w-4 h-4 md:w-5 md:h-5 text-[#4A5759] dark:text-[#E2E8F0]" />
                 <div className="w-1.5 h-1.5 rounded-full bg-border-subtle dark:bg-white/20 my-auto" />
                 <p className="text-[10px] font-bold uppercase tracking-widest text-[#4A5759] dark:text-[#E2E8F0]">Secure & Private</p>
               </div>
@@ -1046,7 +1046,7 @@ export default function App() {
                         onClick={() => setIsMobileMenuOpen(true)}
                         className="md:hidden p-2 -ml-2 text-[#4A5759] dark:text-[#E2E8F0] hover:bg-subtle-bg dark:hover:bg-white/5 rounded-full transition-colors"
                       >
-                        <Smile size={20} md:size={24} />
+                        <Smile className="w-5 h-5" />
                       </button>
                       <h1 className="px-2 md:px-4 py-1 rounded-2xl text-lg md:text-2xl font-serif italic text-[#4A5759] dark:text-white dark:drop-shadow-[0_0_10px_rgba(255,255,255,0.4)]">Friend</h1>
                     </div>
@@ -1191,7 +1191,7 @@ export default function App() {
                         disabled={isLoading || !inputValue.trim()}
                         className={`ml-2 md:ml-4 p-2 md:p-0 text-friend-bg dark:text-indigo-400 font-bold text-xs md:text-sm tracking-widest uppercase flex items-center gap-2 hover:scale-105 transition-transform ${isLoading ? "opacity-30" : ""}`}
                       >
-                        <span className="hidden md:inline">Kirim</span> <Send size={20} className="md:size-18" />
+                        <span className="hidden md:inline">Kirim</span> <Send className="w-5 h-5 md:w-4 md:h-4" />
                       </button>
                     </div>
                   </div>
