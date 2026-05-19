@@ -1,0 +1,47 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Platypi:ital,wght@1,300;1,400;1,500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Platypi", serif;
+
+  --color-bg-primary: #FBF9F6;
+  --color-text-primary: #2D3142;
+  --color-border-subtle: #E8E4DF;
+  
+  --color-friend-bg: #CCD5AE;
+  --color-friend-light: #E9EDC9;
+  --color-sand-medium: #D4A373;
+  --color-sand-light: #FAEDCD;
+  --color-olive-deep: #A3B18A;
+  --color-coral-warm: #E07A5F;
+  --color-muted: #9A9B94;
+  --color-subtle-bg: #FDFCF8;
+}
+
+@layer base {
+  body {
+    @apply bg-bg-primary text-text-primary font-sans antialiased h-screen overflow-hidden;
+  }
+}
+
+.chat-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-container::-webkit-scrollbar-thumb {
+  @apply bg-border-subtle rounded-full;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Friend - Wellness Companion",
+  "description": "Asisten AI pendamping kesejahteraan (wellness companion) untuk remaja Indonesia dengan gaya bahasa santai dan empatik.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
