@@ -210,8 +210,8 @@ const SidebarContent = memo(({
       {user && (
         <div className="p-4 bg-white/50 dark:bg-slate-900/40 rounded-3xl border border-border-subtle dark:border-white/10 flex items-center gap-4 group hover:bg-white/80 dark:hover:bg-slate-900/60 transition-all dark:shadow-[0_0_20px_rgba(99,102,241,0.05)]">
           <div className="w-12 h-12 rounded-2xl overflow-hidden bg-friend-light dark:bg-indigo-900/30 shrink-0 border-2 border-white dark:border-white/20 dark:shadow-[0_0_10px_rgba(255,255,255,0.1)]">
-            {profileData?.photoURL || user.photoURL ? (
-              <img src={profileData?.photoURL || user.photoURL || ""} className="w-full h-full object-cover" alt="Profile" />
+            {profileData?.photoURL || user?.photoURL ? (
+              <img src={profileData?.photoURL || user?.photoURL || ""} className="w-full h-full object-cover" alt="Profile" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-[#4A5759] dark:text-[#E2E8F0]">
                 <UserIcon size={20} />
@@ -592,11 +592,11 @@ export default function App() {
       if (error.code === 'auth/popup-blocked') {
         friendlyMsg = "Popup terblokir oleh browser. Coba aktifkan popup atau gunakan browser lain.";
       } else if (error.code === 'auth/unauthorized-domain') {
-        friendlyMsg = "Domain ini belum diizinkan untuk login. Hubungi admin atau tambahkan domain ini ke Firebase Console.";
+        friendlyMsg = `Domain ini (${window.location.hostname}) BELUM diizinkan untuk login di Firebase Console.`;
       } else if (error.code === 'auth/operation-not-allowed') {
         friendlyMsg = "Metode login Google belum diaktifkan di Firebase Console.";
       }
-      alert(`Login gagal (${error.code || 'unknown'}): ${friendlyMsg}\n\nTips: Jika ini di website baru, pastikan domain ini (${window.location.hostname}) sudah terdaftar di Authorized Domains di Firebase Console.`);
+      alert(`Login Gagal (${error.code || 'error'}): ${friendlyMsg}\n\nCara Fix:\n1. Buka https://console.firebase.google.com/\n2. Pilih Project lo\n3. Ke 'Authentication' -> 'Settings' -> 'Authorized Domains'\n4. Tambahin: ${window.location.hostname}`);
     }
   };
 
@@ -922,7 +922,7 @@ export default function App() {
   };
 
   return (
-    <div className={`flex h-screen h-[100dvh] w-full overflow-hidden transition-colors duration-500 ${isDarkMode ? "dark" : ""}`}>
+    <div className={`flex flex-col h-screen h-[100dvh] w-full overflow-hidden transition-colors duration-500 bg-bg-primary dark:bg-slate-950 ${isDarkMode ? "dark" : ""}`}>
       <BackgroundEffect isDarkMode={isDarkMode} />
       
       <AnimatePresence mode="wait">
@@ -932,7 +932,7 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, scale: 1.05 }}
-            className="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 bg-transparent overflow-y-auto"
+            className="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 bg-bg-primary dark:bg-[#0F172A] overflow-y-auto"
           >
             <div className="absolute top-4 md:top-8 right-4 md:right-8 z-[60]">
               <button
@@ -1034,13 +1034,13 @@ export default function App() {
             </aside>
 
             {/* Main Chat Area */}
-            <main className="flex-1 flex flex-col relative max-w-4xl mx-auto w-full px-4 md:px-12 pb-2 md:pb-6 h-full overflow-hidden">
+            <main className="flex-1 flex flex-col relative max-w-4xl mx-auto w-full px-4 md:px-12 h-screen h-[100dvh] overflow-hidden">
               {isEditingProfile ? (
                 <EditProfileView />
               ) : (
                 <>
                   {/* Sticky Top Navbar */}
-                  <header className="sticky top-0 z-20 -mx-4 md:-mx-12 px-4 md:px-12 py-3 md:py-4 bg-white/60 dark:bg-[#0F172A]/70 backdrop-blur-xl border-b border-border-subtle dark:border-white/10 flex items-center justify-between transition-all duration-500 shadow-sm mb-4 md:mb-6">
+                  <header className="flex-shrink-0 z-20 -mx-4 md:-mx-12 px-4 md:px-12 py-3 md:py-4 bg-white/60 dark:bg-[#0F172A]/70 backdrop-blur-xl border-b border-border-subtle dark:border-white/10 flex items-center justify-between transition-all duration-500 shadow-sm">
                     <div className="flex items-center gap-2 md:gap-4">
                       <button 
                         onClick={() => setIsMobileMenuOpen(true)}
@@ -1060,8 +1060,8 @@ export default function App() {
                       </div>
                       {user && (
                         <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20 ml-2 shadow-sm bg-subtle-bg dark:bg-slate-900/60">
-                          {profileData?.photoURL || user.photoURL ? (
-                            <img src={profileData?.photoURL || user.photoURL || ""} className="w-full h-full object-cover" alt="User" />
+                          {profileData?.photoURL || user?.photoURL ? (
+                            <img src={profileData?.photoURL || user?.photoURL || ""} className="w-full h-full object-cover" alt="User" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-[#4A5759] dark:text-[#E2E8F0]">
                               <UserIcon size={14} />
@@ -1073,8 +1073,8 @@ export default function App() {
                   </header>
 
                   {/* Messages Container */}
-                  <div className="flex-1 overflow-y-auto chat-container pr-2 pb-32">
-                    <div className="max-w-2xl mx-auto w-full space-y-8">
+                  <div className="flex-1 overflow-y-auto chat-container py-4 px-1 md:px-2 scroll-smooth">
+                    <div className="max-w-2xl mx-auto w-full space-y-8 pb-10">
                       <AnimatePresence initial={false}>
                         {messages.map((msg) => (
                           <motion.div
@@ -1165,7 +1165,7 @@ export default function App() {
                   </div>
 
                   {/* Input & Call to Actions */}
-                  <div className="sticky bottom-0 left-0 right-0 py-6 px-4 md:px-0 flex flex-col items-center gap-4 bg-transparent mt-auto z-30">
+                  <div className="flex-shrink-0 py-4 md:py-6 px-4 md:px-0 flex flex-col items-center gap-4 bg-transparent z-30">
                     <div className="flex flex-wrap gap-2 justify-center min-h-[40px]">
                       {isBurningMode && (
                         <button 
