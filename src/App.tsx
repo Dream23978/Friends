@@ -922,10 +922,10 @@ export default function App() {
   };
 
   return (
-    <div className={`flex h-screen h-[100dvh] w-full overflow-hidden transition-colors duration-500 bg-bg-primary dark:bg-slate-950 ${isDarkMode ? "dark" : ""}`}>
+    <div className={`flex flex-col h-[100dvh] w-full overflow-hidden transition-colors duration-500 bg-bg-primary dark:bg-slate-950 ${isDarkMode ? "dark" : ""}`}>
       <BackgroundEffect isDarkMode={isDarkMode} />
       
-      <AnimatePresence mode="wait" initial={false}>
+      <AnimatePresence initial={false}>
         {isLanding ? (
           <motion.div
             key="landing"
@@ -1034,13 +1034,13 @@ export default function App() {
             </aside>
 
             {/* Main Chat Area */}
-            <main className="flex-1 flex flex-col relative max-w-4xl mx-auto w-full px-4 md:px-12 overflow-hidden bg-bg-primary dark:bg-[#0F172A]/30">
+            <main className="flex-1 flex flex-col relative max-w-4xl mx-auto w-full px-4 md:px-12 h-full overflow-hidden bg-bg-primary dark:bg-[#0F172A]/30">
               {isEditingProfile ? (
                 <EditProfileView />
               ) : (
                 <>
                   {/* Sticky Top Navbar */}
-                  <header className="flex-shrink-0 z-20 -mx-4 md:-mx-12 px-4 md:px-12 py-3 md:py-4 bg-white/60 dark:bg-[#0F172A]/70 backdrop-blur-xl border-b border-border-subtle dark:border-white/10 flex items-center justify-between transition-all duration-500 shadow-sm">
+                  <header className="sticky top-0 flex-shrink-0 z-20 -mx-4 md:-mx-12 px-4 md:px-12 py-3 md:py-4 bg-white/70 dark:bg-[#0F172A]/70 backdrop-blur-xl border-b border-border-subtle dark:border-white/10 flex items-center justify-between transition-all duration-500 shadow-sm">
                     <div className="flex items-center gap-2 md:gap-4">
                       <button 
                         onClick={() => setIsMobileMenuOpen(true)}
@@ -1165,8 +1165,8 @@ export default function App() {
                   </div>
 
                   {/* Input & Call to Actions */}
-                  <div className="flex-shrink-0 py-4 md:py-6 px-4 md:px-0 flex flex-col items-center gap-4 bg-transparent z-30">
-                    <div className="flex flex-wrap gap-2 justify-center min-h-[40px]">
+                  <div className="flex-shrink-0 py-3 md:py-6 px-4 md:px-0 flex flex-col items-center gap-3 md:gap-4 bg-transparent z-10">
+                    <div className="flex flex-wrap gap-2 justify-center min-h-[32px] md:min-h-[40px]">
                       {isBurningMode && (
                         <button 
                           onClick={burnMessages}
@@ -1177,21 +1177,21 @@ export default function App() {
                       )}
                     </div>
 
-                    <div className="w-full max-w-2xl bg-white dark:bg-[#1E293B] rounded-[2rem] md:rounded-full px-5 py-3 md:px-8 md:py-4 flex items-center shadow-2xl border border-border-subtle dark:border-white/10 focus-within:ring-2 focus-within:ring-friend-bg transition-all dark:shadow-[0_0_40px_rgba(255,255,255,0.05)]">
+                    <div className="w-full max-w-2xl bg-white dark:bg-[#1E293B] rounded-2xl md:rounded-full px-4 py-2 md:px-8 md:py-4 flex items-center shadow-xl md:shadow-2xl border border-border-subtle dark:border-white/10 focus-within:ring-2 focus-within:ring-friend-bg transition-all dark:shadow-[0_0_40px_rgba(255,255,255,0.05)] mb-2 md:mb-0">
                       <input 
                         type="text" 
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                        placeholder={isBurningMode ? "Tumpahin semua kekesalan lo di sini..." : "Tulis apa aja, gw dengerin..."}
-                        className="flex-1 bg-transparent border-none outline-none text-[#4A5759] dark:text-[#E2E8F0] placeholder-[#B8B8B2] dark:placeholder-[#64748B] text-sm md:text-base"
+                        placeholder={isBurningMode ? "Tumpahin kesal lo..." : "Tulis apa aja..."}
+                        className="flex-1 bg-transparent border-none outline-none text-[#4A5759] dark:text-[#E2E8F0] placeholder-[#B8B8B2] dark:placeholder-[#64748B] text-sm md:text-base py-2 md:py-0"
                       />
                       <button 
                         onClick={() => handleSend()}
                         disabled={isLoading || !inputValue.trim()}
                         className={`ml-2 md:ml-4 p-2 md:p-0 text-friend-bg dark:text-indigo-400 font-bold text-xs md:text-sm tracking-widest uppercase flex items-center gap-2 hover:scale-105 transition-transform ${isLoading ? "opacity-30" : ""}`}
                       >
-                        <span className="hidden md:inline">Kirim</span> <Send size={18} />
+                        <span className="hidden md:inline">Kirim</span> <Send size={20} className="md:size-18" />
                       </button>
                     </div>
                   </div>
