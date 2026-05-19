@@ -922,10 +922,10 @@ export default function App() {
   };
 
   return (
-    <div className={`flex flex-col h-screen h-[100dvh] w-full overflow-hidden transition-colors duration-500 bg-bg-primary dark:bg-slate-950 ${isDarkMode ? "dark" : ""}`}>
+    <div className={`flex h-screen h-[100dvh] w-full overflow-hidden transition-colors duration-500 bg-bg-primary dark:bg-slate-950 ${isDarkMode ? "dark" : ""}`}>
       <BackgroundEffect isDarkMode={isDarkMode} />
       
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" initial={false}>
         {isLanding ? (
           <motion.div
             key="landing"
@@ -1034,7 +1034,7 @@ export default function App() {
             </aside>
 
             {/* Main Chat Area */}
-            <main className="flex-1 flex flex-col relative max-w-4xl mx-auto w-full px-4 md:px-12 h-screen h-[100dvh] overflow-hidden">
+            <main className="flex-1 flex flex-col relative max-w-4xl mx-auto w-full px-4 md:px-12 overflow-hidden bg-bg-primary dark:bg-[#0F172A]/30">
               {isEditingProfile ? (
                 <EditProfileView />
               ) : (
