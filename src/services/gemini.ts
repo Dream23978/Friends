@@ -76,7 +76,14 @@ export async function chatWithFriend(history: ChatMessage[], message: string, me
   });
   
   if (!response.ok) {
-    throw new Error("Gagal ngobrol sama Friend. Coba lagi ya!");
+    let errorMsg = "Gagal ngobrol sama Friend. Coba lagi ya!";
+    try {
+      const errRes = await response.json();
+      if (errRes.details || errRes.error) {
+        errorMsg = `${errRes.error || "Gagal"}: ${errRes.details || "Ada kesalahan pada koneksi."}`;
+      }
+    } catch (_) {}
+    throw new Error(errorMsg);
   }
   
   const data = await response.json();

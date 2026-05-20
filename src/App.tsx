@@ -1201,12 +1201,13 @@ export default function App() {
         })();
       }
 
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      const errorMessageStr = error?.message || "Coba lagi deh.";
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "model",
-        text: "Duh, sori banget, gw lagi agak nge-blank nih. Sinyalnya kali ya? Coba lagi deh.",
+        text: `Duh, sori banget, gw lagi agak nge-blank nih. Sinyalnya kali ya? (Error: ${errorMessageStr})`,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -1525,7 +1526,7 @@ export default function App() {
               ) : (
                 <>
                   {/* Sticky Top Navbar */}
-                  <header className="sticky top-0 flex-shrink-0 z-20 -mx-4 md:-mx-12 px-4 md:px-12 py-3 md:py-4 bg-white/70 dark:bg-[#0F172A]/70 backdrop-blur-xl border-b border-border-subtle dark:border-white/10 flex items-center justify-between transition-all duration-500 shadow-sm">
+                  <header className="sticky top-4 flex-shrink-0 z-20 mt-4 px-6 py-3 bg-white/75 dark:bg-[#0F172A]/70 backdrop-blur-xl border border-border-subtle/50 dark:border-white/10 rounded-2xl md:rounded-full flex items-center justify-between transition-all duration-300 shadow-md">
                     <div className="flex items-center gap-2 md:gap-4">
                       <button 
                         onClick={() => setIsMobileMenuOpen(true)}
