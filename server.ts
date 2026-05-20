@@ -13,15 +13,25 @@ async function startServer() {
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
-  // Gemini Setup
-  const ai = new GoogleGenAI({ 
-    apiKey: process.env.GEMINI_API_KEY || "",
-    httpOptions: {
-      headers: {
-        'User-Agent': 'aistudio-build',
+  // Gemini Setup Lazy-Initialization
+  let aiInstance: GoogleGenAI | null = null;
+  function getAI() {
+    if (!aiInstance) {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new Error("Gemini API Key is not configured on the server.");
       }
+      aiInstance = new GoogleGenAI({ 
+        apiKey,
+        httpOptions: {
+          headers: {
+            'User-Agent': 'aistudio-build',
+          }
+        }
+      });
     }
-  });
+    return aiInstance;
+  }
 
   // API Routes
   app.post("/api/moderate", async (req, res) => {
@@ -38,7 +48,7 @@ async function startServer() {
         return res.status(500).json({ error: "Gemini API Key is not configured on the server." });
       }
       
-      const response = await ai.models.generateContent({
+      const response = await getAI().models.generateContent({
         model: "gemini-3.5-flash",
         contents: [
           {
@@ -103,7 +113,7 @@ async function startServer() {
       }
       parts.push({ text: message });
       
-      const response = await ai.models.generateContent({
+      const response = await getAI().models.generateContent({
         model: "gemini-3.5-flash",
         contents: [
           ...history,
@@ -141,7 +151,7 @@ async function startServer() {
         return res.status(500).json({ error: "Gemini API Key missing" });
       }
       
-      const response = await ai.models.generateContent({
+      const response = await getAI().models.generateContent({
         model: "gemini-2.5-flash-image",
         contents: {
           parts: [{ text: prompt }]
@@ -188,7 +198,8 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.join(process.cwd(), 'dist');
+    // In compiled CJS context, __dirname is the '/dist' directory.
+    const distPath = typeof __dirname !== "undefined" ? __dirname : path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
     app.get('*', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
@@ -200,4 +211,7 @@ async function startServer() {
   });
 }
 
-startServer();
+startServer().catch((err) => {
+  console.error("FATAL ERROR during startServer:", err);
+  process.exit(1);
+});
