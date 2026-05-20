@@ -48,6 +48,14 @@ Aturan: Berikan pesan penutup yang sangat singkat, lalu WAJIB lampirkan prompt g
 Format Wajib:
 [Teks penutup santai]
 [GENERATE_STICKER: <deskripsi gambar dalam bahasa inggris, calming, minimal art, plain background, absolutely no math or number elements, vector illustration>]
+
+5. Respon Tidak Semangat (Penyemangat Stiker Instan):
+Pemicu: Pengguna merasa tidak semangat, lesu, lelah mental, sedih, capek, bad mood, down, atau tidak bertenaga.
+Aturan: Berikan balasan penyemangat yang sangat hangat, tulus, empati, memvalidasi perasaan lelah mereka tanpa bersifat toxic positivity, dan lo WAJIB langsung melampirkan stiker lucu yang SANGAT BERVARIASI sebagai penyemangat di baris paling akhir respons lo.
+Jangan selalu menggunakan stiker yang sama. Sesuaikan deskripsi stikernya dengan cerita atau situasi mereka secara unik (misalnya: anak kucing imut minum teh hangat, sloth santum tidur di ranting, cangkir kopi tersenyum ceria, panda gembul memeluk bintang, beruang kutub selimutan santai, kelinci terbang pakai balon, dll.).
+Format Wajib:
+[Teks penyemangat santai dan penuh empati]
+[GENERATE_STICKER: <deskripsi gambar imut bahasa inggris yang dikoordinasikan dengan cerita, cute chibi style, comforting colors, sticker style, white border, minimalist>]
 `;
 
 export interface ChatMessage {
@@ -55,14 +63,15 @@ export interface ChatMessage {
   parts: { text: string }[];
 }
 
-export async function chatWithFriend(history: ChatMessage[], message: string) {
+export async function chatWithFriend(history: ChatMessage[], message: string, media?: { data: string; mimeType: string }) {
   const response = await fetch("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ 
       history, 
       message,
-      systemInstruction: SYSTEM_INSTRUCTION
+      systemInstruction: SYSTEM_INSTRUCTION,
+      media
     }),
   });
   
@@ -74,7 +83,18 @@ export async function chatWithFriend(history: ChatMessage[], message: string) {
   return data.text;
 }
 
+let isStickerQuotaExhausted = false;
+
+export function checkIsStickerQuotaExhausted(): boolean {
+  return isStickerQuotaExhausted;
+}
+
 export async function generateSticker(prompt: string): Promise<string> {
+  if (isStickerQuotaExhausted) {
+    console.log("[generateSticker] API quota is marked as exhausted. Skipping request and instantly returning local fallback.");
+    throw new Error("QUOTA_EXHAUSTED");
+  }
+
   const response = await fetch("/api/sticker", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -82,6 +102,16 @@ export async function generateSticker(prompt: string): Promise<string> {
   });
   
   if (!response.ok) {
+    if (response.status === 429) {
+      isStickerQuotaExhausted = true;
+    } else {
+      try {
+        const errData = await response.json();
+        if (errData.error === "QUOTA_EXHAUSTED" || (errData.details && errData.details.toLowerCase().includes("quota"))) {
+          isStickerQuotaExhausted = true;
+        }
+      } catch (_) {}
+    }
     throw new Error("Gagal bikin stiker. Coba lagi ya!");
   }
   
