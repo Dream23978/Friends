@@ -93,9 +93,10 @@ async function startServer() {
 
   app.post("/api/chat", async (req, res) => {
     try {
-      const { history, message, systemInstruction, media } = req.body;
+      const { history, message, systemInstruction, media, model } = req.body;
+      const targetModel = model === "gemini-3.1-flash-lite" ? "gemini-3.1-flash-lite" : "gemini-3.5-flash";
       
-      console.log(`[Chat] Request from user. History length: ${history?.length || 0}. Has media: ${!!media}`);
+      console.log(`[Chat] Request from user. History length: ${history?.length || 0}. Has media: ${!!media}. Model: ${targetModel}`);
 
       if (!process.env.GEMINI_API_KEY) {
         console.error("[Chat] GEMINI_API_KEY is missing!");
@@ -114,7 +115,7 @@ async function startServer() {
       parts.push({ text: message });
       
       const response = await getAI().models.generateContent({
-        model: "gemini-3.5-flash",
+        model: targetModel,
         contents: [
           ...history,
           { role: "user", parts }
@@ -138,6 +139,12 @@ async function startServer() {
       res.json({ text: responseText });
     } catch (error: any) {
       console.error("[Chat] API Error:", error);
+      const errMsg = error.message || "";
+      const isQuota = errMsg.includes("429") || errMsg.includes("quota") || errMsg.includes("RESOURCE_EXHAUSTED") || error.status === 429;
+      if (isQuota) {
+        console.warn("[Chat] Rate limit/quota hit. Returning LIMIT_REACHED.");
+        return res.status(429).json({ error: "LIMIT_REACHED", details: errMsg });
+      }
       res.status(500).json({ error: "Failed to chat with Gemini", details: error.message });
     }
   });

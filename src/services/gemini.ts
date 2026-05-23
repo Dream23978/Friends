@@ -63,7 +63,12 @@ export interface ChatMessage {
   parts: { text: string }[];
 }
 
-export async function chatWithFriend(history: ChatMessage[], message: string, media?: { data: string; mimeType: string }) {
+export async function chatWithFriend(
+  history: ChatMessage[], 
+  message: string, 
+  media?: { data: string; mimeType: string },
+  model: string = "gemini-3.5-flash"
+) {
   const response = await fetch("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -71,18 +76,27 @@ export async function chatWithFriend(history: ChatMessage[], message: string, me
       history, 
       message,
       systemInstruction: SYSTEM_INSTRUCTION,
-      media
+      media,
+      model
     }),
   });
   
   if (!response.ok) {
+    if (response.status === 429) {
+      throw new Error("LIMIT_REACHED");
+    }
     let errorMsg = "Gagal ngobrol sama Friend. Coba lagi ya!";
     try {
       const errRes = await response.json();
+      if (errRes.error === "LIMIT_REACHED") {
+        throw new Error("LIMIT_REACHED");
+      }
       if (errRes.details || errRes.error) {
         errorMsg = `${errRes.error || "Gagal"}: ${errRes.details || "Ada kesalahan pada koneksi."}`;
       }
-    } catch (_) {}
+    } catch (e: any) {
+      if (e.message === "LIMIT_REACHED") throw e;
+    }
     throw new Error(errorMsg);
   }
   

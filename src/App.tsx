@@ -50,6 +50,8 @@ interface Message {
   mediaUrl?: string;
   mediaType?: string;
   mediaName?: string;
+  isLimitError?: boolean;
+  failedModel?: string;
 }
 
 interface ChatSession {
@@ -442,6 +444,7 @@ export default function App() {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
+  const [activeModel, setActiveModel] = useState<"gemini-3.5-flash" | "gemini-3.1-flash-lite">("gemini-3.5-flash");
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingMood, setIsGeneratingMood] = useState(false);
   const [showGrounding, setShowGrounding] = useState(false);
@@ -1106,7 +1109,7 @@ export default function App() {
     try {
       // Limit history to last 14 messages (7 turns) to optimize request size & speed
       const limitedHistory = history.slice(-14);
-      const responseText = await chatWithFriend(limitedHistory, textToSend, mediaPayload);
+      const responseText = await chatWithFriend(limitedHistory, textToSend, mediaPayload, activeModel);
       
       const stickerMatch = responseText.match(/\[GENERATE_STICKER: (.*?)\]/);
       const groundingMatch = responseText.match(/\[TRIGGER_GROUNDING\]/);
@@ -1204,11 +1207,16 @@ export default function App() {
     } catch (error: any) {
       console.error(error);
       const errorMessageStr = error?.message || "Coba lagi deh.";
+      const isLimit = errorMessageStr === "LIMIT_REACHED";
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "model",
-        text: `Duh, sori banget, gw lagi agak nge-blank nih. Sinyalnya kali ya? (Error: ${errorMessageStr})`,
-        timestamp: new Date()
+        text: isLimit 
+          ? `Waduh, kuota obrolan model ${activeModel === "gemini-3.5-flash" ? "Gemini 3.5 Flash" : "Gemini 3.1 Flash Lite"} lagi habis atau mendadak limit nih. 🥺` 
+          : `Duh, sori banget, gw lagi agak nge-blank nih. Sinyalnya kali ya? (Error: ${errorMessageStr})`,
+        timestamp: new Date(),
+        isLimitError: isLimit,
+        failedModel: activeModel
       };
       setMessages(prev => [...prev, errorMessage]);
       setIsLoading(false);
@@ -1535,6 +1543,26 @@ export default function App() {
                         <Smile className="w-5 h-5" />
                       </button>
                       <h1 className="px-2 md:px-4 py-1 rounded-2xl text-lg md:text-2xl font-serif italic text-[#4A5759] dark:text-white dark:drop-shadow-[0_0_10px_rgba(255,255,255,0.4)]">Friend</h1>
+                      
+                      {/* Model Selector Pill */}
+                      <div className="flex items-center gap-0.5 p-0.5 bg-[#EDEDE9]/80 dark:bg-[#1E293B]/60 rounded-full border border-neutral-200/50 dark:border-white/5 text-[10px] md:text-xs">
+                        <button
+                          onClick={() => setActiveModel("gemini-3.5-flash")}
+                          className={`px-2 py-0.5 md:px-2.5 md:py-1 rounded-full transition-all duration-300 font-bold flex items-center gap-1 ${activeModel === "gemini-3.5-flash" ? "bg-white dark:bg-slate-700 text-friend-bg dark:text-indigo-400 shadow-sm" : "text-muted hover:text-[#4A5759] dark:hover:text-white"}`}
+                          title="Gemini 3.5 Flash: Model utama yang super pintar"
+                        >
+                          <Sparkles size={11} className={activeModel === "gemini-3.5-flash" ? "text-friend-bg dark:text-indigo-400 animate-pulse" : "text-[#B8B8B2]"} />
+                          <span className="hidden sm:inline">Standard</span>
+                        </button>
+                        <button
+                          onClick={() => setActiveModel("gemini-3.1-flash-lite")}
+                          className={`px-2 py-0.5 md:px-2.5 md:py-1 rounded-full transition-all duration-300 font-bold flex items-center gap-1 ${activeModel === "gemini-3.1-flash-lite" ? "bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-400 shadow-sm" : "text-muted hover:text-[#4A5759] dark:hover:text-white"}`}
+                          title="Gemini 3.1 Flash Lite: Hemat kuota, lebih cepat & anti limit"
+                        >
+                          <Zap size={11} className={activeModel === "gemini-3.1-flash-lite" ? "text-teal-600 dark:text-teal-400" : "text-[#B8B8B2]"} />
+                          <span className="hidden sm:inline">Lite</span>
+                        </button>
+                      </div>
                     </div>
                     
                     <div className="flex items-center gap-3">
@@ -1595,7 +1623,91 @@ export default function App() {
                                 ${msg.role === "user" 
                                   ? "bg-white dark:bg-[#1E293B] dark:text-[#F8FAFC] rounded-tr-none text-right dark:shadow-[0_0_20px_rgba(255,255,255,0.05)] dark:hover:shadow-[0_0_25px_rgba(255,255,255,0.1)]" 
                                   : "bg-white dark:bg-[#1E293B] dark:text-[#F8FAFC] rounded-tl-none text-left dark:shadow-[0_0_20px_rgba(165,180,252,0.08)] dark:hover:shadow-[0_0_25px_rgba(165,180,252,0.12)]"}`}>
-                                <p className="text-base md:text-lg leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                                {msg.isLimitError ? (
+                                  <div className="space-y-4">
+                                    <p className="text-base md:text-lg leading-relaxed whitespace-pre-wrap text-[#4A5759] dark:text-[#E2E8F0]">
+                                      {msg.text}
+                                    </p>
+                                    <div className="p-4 bg-amber-500/5 dark:bg-amber-400/5 border border-amber-500/20 dark:border-amber-400/15 rounded-2xl flex flex-col gap-3 animate-fade-in shadow-inner text-left">
+                                      <p className="text-xs md:text-sm text-[#5C6B6E] dark:text-[#94A3B8] leading-relaxed">
+                                        Jangan sedih dan nggak usah nunggu lama! Cobalah beralih ke model <span className="font-bold text-teal-600 dark:text-indigo-400">Gemini 3.1 Flash Lite</span> yang super hemat & cepat biar kita bisa lanjut ngobrol hangat seperti biasa. ✨
+                                      </p>
+                                      
+                                      <button
+                                        onClick={() => {
+                                          setActiveModel("gemini-3.1-flash-lite");
+                                          const botMsgId = Date.now().toString();
+                                          setMessages(prev => [
+                                            ...prev,
+                                            {
+                                              id: botMsgId,
+                                              role: "model",
+                                              text: "Selesai! Gw udah beralih ke Gemini 3.1 Flash Lite. Yuk, lanjut cerita, gw siap dengerin keluh kesah lo kapan saja! ⚡🎈",
+                                              timestamp: new Date()
+                                            }
+                                          ]);
+                                        }}
+                                        className="py-2.5 px-4 bg-teal-600 hover:bg-teal-700 text-white dark:bg-indigo-600 dark:hover:bg-indigo-700 rounded-full font-bold text-xs md:text-sm shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 self-start ring-2 ring-teal-500/10"
+                                      >
+                                        <Zap size={14} className="animate-bounce" />
+                                        Beralih ke Gemini 3.1 Lite & Lanjut
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : msg.text.includes("(Error:") ? (
+                                  <div>
+                                    {(() => {
+                                      const parts = msg.text.split("(Error:");
+                                      const friendlyText = parts[0]?.trim() || "Ada sedikit gangguan koneksi nih.";
+                                      const rawError = parts[1] ? parts[1].replace(/\)$/, "").trim() : "";
+                                      
+                                      return (
+                                        <div className="space-y-4">
+                                          <p className="text-base md:text-lg leading-relaxed whitespace-pre-wrap text-[#4A5759] dark:text-[#E2E8F0]">{friendlyText}</p>
+                                          {rawError && (
+                                            <div className="mt-3 text-left">
+                                              <details className="group border border-red-200/50 dark:border-red-500/10 rounded-2xl bg-red-50/50 dark:bg-red-500/5 p-3 transition-colors">
+                                                <summary className="text-xs font-semibold cursor-pointer text-red-500 dark:text-red-400 select-none flex items-center gap-1.5 focus:outline-none">
+                                                  <span>Lihat Detail Gangguan</span>
+                                                  <span className="transition-transform group-open:rotate-180">▼</span>
+                                                </summary>
+                                                <div className="mt-2 text-xs font-mono text-red-700 dark:text-red-300 overflow-x-auto whitespace-pre-wrap bg-white/70 dark:bg-black/20 p-2.5 rounded-xl border border-red-100 dark:border-red-950/25">
+                                                  {rawError}
+                                                </div>
+                                              </details>
+                                            </div>
+                                          )}
+                                          <div className="pt-2 flex flex-col gap-2 text-left">
+                                            <p className="text-xs text-muted dark:text-[#64748B]">
+                                              Saran: model yang terpilih saat ini mungkin sedang kelebihan beban sementara. Lo bisa beralih ke model lite yang lebih stabil:
+                                            </p>
+                                            <button
+                                              onClick={() => {
+                                                setActiveModel("gemini-3.1-flash-lite");
+                                                const botMsgId = Date.now().toString();
+                                                setMessages(prev => [
+                                                  ...prev,
+                                                  {
+                                                    id: botMsgId,
+                                                    role: "model",
+                                                    text: "Selesai! Gw udah beralih ke Gemini 3.1 Flash Lite. Yuk coba curhat lagi, semoga lancar jaya ya! ⚡🌸",
+                                                    timestamp: new Date()
+                                                  }
+                                                ]);
+                                              }}
+                                              className="py-2 px-3 bg-neutral-100 hover:bg-neutral-200 text-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200 rounded-full font-semibold text-xs transition-all active:scale-95 flex items-center justify-center gap-1.5 self-start border border-neutral-200 dark:border-white/10"
+                                            >
+                                              <Zap size={12} />
+                                              Ganti ke Gemini 3.1 Lite
+                                            </button>
+                                          </div>
+                                        </div>
+                                      );
+                                    })()}
+                                  </div>
+                                ) : (
+                                  <p className="text-base md:text-lg leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                                )}
                                 {msg.mediaUrl && (
                                   <div className="mt-3 mb-2 rounded-2xl overflow-hidden max-w-sm bg-neutral-100 dark:bg-black/30 p-1 border border-neutral-200 dark:border-white/5 transition-colors">
                                     {msg.mediaType?.startsWith("image/") ? (
